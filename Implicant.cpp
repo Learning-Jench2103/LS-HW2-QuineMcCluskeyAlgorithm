@@ -1,302 +1,144 @@
 #include "Implicant.h"
-#include <algorithm>
 #include <cmath>
-#include <vector>
-
 using namespace std;
 
-void Implicant::computeDecimal()
+int Implicant::variable_amount = 10;
+
+void Implicant::findDontCare()
 {
-	int careNum = 0;
-	vector<int> dontCare;
-
-	switch (variables) {
-	case 4:
-		for (int i = 0; i < 4; i++) {
-			if (boolean[i] == -1) {
-				dontCare.push_back(i);
-				continue;
-			}
-			if (boolean[i] == 1) {
-				careNum += pow(2, 3 - i);
-			}
+	for (int i = 0; i < variable_amount; i++) {
+		if (boolean.at(i) == -1) {
+			dont_care_positoin.push_back(i);
 		}
+	}
+	return;
+}
 
-		decimalNum.insert(careNum);
-
-		if (dontCare.size() == 1) {
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(0)));
-		}
-		else if (dontCare.size() == 2) {
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(0)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(1)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(0)) + pow(2, 3 - dontCare.at(1)));
-		}
-		else if (dontCare.size() == 3) {
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(0)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(1)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(2)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(0)) + pow(2, 3 - dontCare.at(1)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(0)) + pow(2, 3 - dontCare.at(2)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(1)) + pow(2, 3 - dontCare.at(2)));
-			decimalNum.insert(careNum + pow(2, 3 - dontCare.at(0)) + pow(2, 3 - dontCare.at(1)) + pow(2, 3 - dontCare.at(2)));
-		}
-
-		break;
-
-	case 3:
-		for (int i = 0; i < 3; i++) {
-			if (boolean[i] == -1) {
-				dontCare.push_back(i);
-				continue;
-			}
-			if (boolean[i] == 1) {
-				careNum += pow(2, 2 - i);
+void Implicant::computeDecimal(int taken, int result, int now, int round, int care_sigma)
+{
+	if (care_sigma == -1) {
+		care_sigma = 0;
+		for (int i = 0; i < variable_amount; i++) {
+			if (boolean.at(i) == 1) {
+				care_sigma += pow(10, variable_amount - 1 - i);
 			}
 		}
-
-		decimalNum.insert(careNum);
-
-		if (dontCare.size() == 1) {
-			decimalNum.insert(careNum + pow(2, 2 - dontCare.at(0)));
+		result = care_sigma;
+	}
+	if (round = taken) {
+		decimalNum.insert(result);
+		return;
+	}
+	if (taken - round > dont_care_positoin.size() - 1 - now) {
+		return;
+	}
+	else {
+		result += boolean.at(dont_care_positoin.at(now));
+		for (int i = now + 1; i < dont_care_positoin.size(); i++) {
+			computeDecimal(taken, result, i, round + 1, care_sigma);
 		}
-		else if (dontCare.size() == 2) {
-			decimalNum.insert(careNum + pow(2, 2 - dontCare.at(0)));
-			decimalNum.insert(careNum + pow(2, 2 - dontCare.at(1)));
-			decimalNum.insert(careNum + pow(2, 2 - dontCare.at(0)) + pow(2, 2 - dontCare.at(1)));
-		}
-
-		break;
-
-	case 2:
-		for (int i = 0; i < 2; i++) {
-			if (boolean[i] == -1) {
-				dontCare.push_back(i);
-				continue;
-			}
-			if (boolean[i] == 1) {
-				careNum += pow(2, 1 - i);
-			}
-		}
-
-		decimalNum.insert(careNum);
-
-		if (dontCare.size() == 1) {
-			decimalNum.insert(careNum + pow(2, 1 - dontCare.at(0)));
-		}
-
-		break;
 	}
 }
 
-Implicant::Implicant(int value, int v):variables(v)
+Implicant::Implicant(int decimal, bool care_implicant)
 {
-	switch (variables) {
-	case 4:
-		if (value >= 8) {
-			boolean[0] = 1;
-			value -= 8;
-		}
-		else {
-			boolean[0] = 0;
-		}
-		if (value >= 4) {
-			boolean[1] = 1;
-			value -= 4;
-		}
-		else {
-			boolean[1] = 0;
-		}
-		if (value >= 2) {
-			boolean[2] = 1;
-			value -= 2;
-		}
-		else {
-			boolean[2] = 0;
-		}
-		if (value == 1) {
-			boolean[3] = 1;
-		}
-		else {
-			boolean[3] = 0;
-		}
+	boolean.resize(variable_amount);
 
-		break;
-	case 3:
-		if (value >= 4) {
-			boolean[0] = 1;
-			value -= 4;
+	for (int i = 0; i < variable_amount; i++) {
+		if (decimal > pow(2, variable_amount - i - 1)) {
+			boolean.at(i) = 1;
+			decimal -= pow(2, variable_amount - i - 1);
 		}
 		else {
-			boolean[0] = 0;
+			boolean.at(i) = 0;
 		}
-		if (value >= 2) {
-			boolean[1] = 1;
-			value -= 2;
-		}
-		else {
-			boolean[1] = 0;
-		}
-		if (value == 1) {
-			boolean[2] = 1;
-		}
-		else {
-			boolean[2] = 0;
-		}
-		boolean[3] = -1;
-
-		break;
-	case 2:
-		if (value >= 2) {
-			boolean[0] = 1;
-			value -= 2;
-		}
-		else {
-			boolean[0] = 0;
-		}
-		if (value == 1) {
-			boolean[1] = 1;
-		}
-		else {
-			boolean[1] = 0;
-		}
-		boolean[2] = -1;
-		boolean[3] = -1;
-
-		break;
 	}
 
-	computeDecimal();
+	Implicant::care_implicant = care_implicant;
+	object_list.insert(this);
+	findDontCare();
+	for (int i = 0; i <= dont_care_positoin.size(); i++) {
+		computeDecimal(i);
+	}
+
 }
 
-Implicant::Implicant(string input, int v)
-	:variables(v)
+Implicant::Implicant(const string term, bool care_implicant)
 {
-	const int length = input.length();
-	int char_now;
-
-	// a //
-	char_now = input.find('a', 0);
-	if (char_now != -1) {
-		if (char_now + 1 < length) {
-			if (input.at(char_now + 1) == '\'') {
-				boolean[0] = 0;
-			}
-			else {
-				boolean[0] = 1;
-			}
-		}
-		else {
-			boolean[0] = 1;
-		}
-	}
-	else {
-		boolean[0] = -1;
-	}
-
-	// b //
-	char_now = input.find('b', 0);
-	if (char_now != -1) {
-		if (char_now + 1 < length) {
-			if (input.at(char_now + 1) == '\'') {
-				boolean[1] = 0;
-			}
-			else {
-				boolean[1] = 1;
-			}
-		}
-		else {
-			boolean[1] = 1;
-		}
-	}
-	else {
-		boolean[1] = -1;
-	}
-
-	// c //
-	char_now = input.find('c', 0);
-	if (char_now != -1) {
-		if (char_now + 1 < length) {
-			if (input.at(char_now + 1) == '\'') {
-				boolean[2] = 0;
-			}
-			else {
-				boolean[2] = 1;
-			}
-		}
-		else {
-			boolean[2] = 1;
-		}
-	}
-	else {
-		boolean[2] = -1;
-	}
-
-	// d //
-	char_now = input.find('d', 0);
-	if (char_now != -1) {
-		if (char_now + 1 < length) {
-			if (input.at(char_now + 1) == '\'') {
-				boolean[3] = 0;
-			}
-			else {
-				boolean[3] = 1;
-			}
-		}
-		else {
-			boolean[3] = 1;
-		}
-	}
-	else {
-		boolean[3] = -1;
-	}
-
-	computeDecimal();
-}
-
-Implicant::Implicant(Implicant& a, Implicant& b, int v)
-	:variables(v)
-{
-	vector<int> diff;
-	for (int i = 0; i < 4; i++) {
-		if (a.boolean[i] != b.boolean[i]) {
-			diff.push_back(i);
-		}
-	}
-
-	// for debug //
-	if (diff.size() != 1) {
-		cout << "Implicant(Implicant&, Implicant&) ERROR!!!" << endl;
-	}
-
-	for (int i = 0; i < 4; i++) {
-		if (i == diff.at(0)) {
-			boolean[i] = -1;
+	int var = 0;
+	for (int i = 0; i < term.length(); i++) {
+		if (term[i] < 'a' || term[i] > 'z') {
 			continue;
 		}
-		boolean[i] = a.boolean[i];
+		if ((term[i] >= 'a' && term[i] <= 'z') && term[i] - 'a' + 1 > var) {
+			var = term[i] - 'a' + 1;
+		}
 	}
-
-	computeDecimal();
-}
-
-
-
-bool Implicant::oneDifferent(const Implicant& a)
-{
-	int count = 0;
-	for (int i = 0; i < 4; i++) {
-		if (boolean[i] != a.boolean[i]) {
-			count++;
+	for (int i = 0; i < var; i++) {
+		int posi = term.find((char)('a' + i), 0);
+		if (posi == -1) {
+			boolean.at(i) = -1;
+			continue;
+		}
+		if (posi == term.length() - 1 || (posi < term.length() - 1 && term[posi + 1] != '\'')) {
+			boolean.at(i) = 1;
+		}
+		else {
+			boolean.at(i) = 0;
 		}
 	}
 
-	if (count == 1) {
-		return true;
+	Implicant::care_implicant = care_implicant;
+	object_list.insert(this);
+	findDontCare();
+	for (int i = 0; i <= dont_care_positoin.size(); i++) {
+		computeDecimal(i);
 	}
-	else {
+}
+
+Implicant::Implicant(Implicant& a, Implicant& b)
+{
+	boolean = a.boolean;
+	for (int i = 0; i < a.boolean.size(); i++) {
+		if (a.boolean.at(i) != b.boolean.at(i)) {
+			boolean.at(i) = -1;
+		}
+	}
+
+	a.merged = true; b.merged = true;
+	Implicant::care_implicant = (a.care_implicant || b.care_implicant);
+	object_list.insert(this);
+	findDontCare();
+	for (int i = 0; i <= dont_care_positoin.size(); i++) {
+		computeDecimal(i);
+	}
+	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
+		if ((*this) == *(*it)) {
+			repeated = true;
+		}
+	}
+}
+
+Implicant::~Implicant()
+{
+	object_list.erase(this);
+}
+
+bool Implicant::oneDiffer(const Implicant& a) const
+{
+	if (a.boolean.size() != boolean.size()) {
 		return false;
 	}
+	int count = 0;
+	for (int i = 0; i < boolean.size(); i++) {
+		if (boolean.at(i) != a.boolean.at(i)) {
+			count++;
+			if (count > 1) {
+				return false;
+			}
+		}
+	}
+	return count == 1;
 }
 
 set<int> Implicant::getDecimal() const
@@ -306,20 +148,17 @@ set<int> Implicant::getDecimal() const
 
 int Implicant::care() const
 {
-	int count = 0;
-	for (int i = 0; i < 4; i++) {
-		if (boolean[i] == -1) {
-			count++;
+	int care = 0;
+	for (int i = 0; i < variable_amount; i++) {
+		if (boolean.at(i) != -1) {
+			care++;
 		}
 	}
-	return 4 - count;
+	return care;
 }
 
-bool Implicant::contain(Implicant& a)
+bool Implicant::contain(Implicant& a) const
 {
-	if (care() > a.care()) {
-		return false;
-	}
 	for (set<int>::iterator it = a.decimalNum.begin(); it != a.decimalNum.end(); it++) {
 		if (decimalNum.find(*it) == decimalNum.end()) {
 			return false;
@@ -328,50 +167,73 @@ bool Implicant::contain(Implicant& a)
 	return true;
 }
 
-bool Implicant::operator==(Implicant& a)
+bool Implicant::operator==(const Implicant& a) const
 {
-	for (int i = 0; i < 4; i++) {
-		if (boolean[i] != a.boolean[i]) {
-			return false;
+	return (boolean == a.boolean && decimalNum == a.decimalNum);
+}
+
+bool Implicant::setVariableAmount(int variable_amount)
+{
+	if (variable_amount < Implicant::variable_amount) {
+		return false;
+	}
+	if (variable_amount == Implicant::variable_amount) {
+		return true;
+	}
+	int old_amount = Implicant::variable_amount;
+	Implicant::variable_amount = variable_amount;
+	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
+		for (int i = old_amount; i < variable_amount; i++) {
+			(*it)->boolean.push_back(-1);
+		}
+		(*it)->findDontCare();
+		for (int i = 0; i <= (*it)->dont_care_positoin.size(); i++) {
+			(*it)->computeDecimal(i);
 		}
 	}
-	if (variables != a.variables) {
-		return false;
-	}
-	if (decimalNum != a.decimalNum) {
-		return false;
-	}
+
 	return true;
-
 }
 
-int Implicant::getVariables()
+int Implicant::getVariableAmount()
 {
-	return variables;
+	return variable_amount;
 }
 
-/*
-Implicant& Implicant::operator=(Implicant& a)
+ostream& operator<<(ostream& output, Implicant& implicant)
 {
-	for (int i = 0; i < 4; i++) {
-		boolean[i] = a.boolean[i];
+	if (implicant.repeated == true) {
+		output << 'x';
 	}
-	variables = a.variables;
-	decimalNum = a.decimalNum;
-	return *this;
-}
-*/
+	else if (implicant.merged == true) {
+		output << 'v';
+	}
+	else if (implicant.care_implicant == false) {
+		output << 'd';
+	}
+	else {
+		output << ' ';
+	}
 
-ostream& operator<<(ostream& output, Implicant& a)
-{
-	for (int i = 0; i < 4; i++) {
-		switch (a.boolean[i]) {
-		case 1:
-			output << (char)('a' + i);
-			break;
-		case 0:
-			output << (char)('a' + i) << '\'';
-			break;
+	output << ' ';
+
+	for (int i = 0; i < Implicant::variable_amount; i++) {
+		if (implicant.boolean.at(i) == -1) {
+			output << '-';
+		}
+		else {
+			output << implicant.boolean.at(i);
+		}
+	}
+
+	output << " : ";
+
+	int countDecimal = 0;
+	for (set<int>::iterator it = implicant.decimalNum.begin(); it != implicant.decimalNum.end(); it++) {
+		output << *it;
+		++countDecimal;
+		if (countDecimal < implicant.decimalNum.size()) {
+			output << ", ";
 		}
 	}
 

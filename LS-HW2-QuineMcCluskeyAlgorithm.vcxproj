@@ -138,10 +138,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Implicant.cpp" />
+    <ClInclude Include="Implicant.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Implicant.h" />
+    <ClCompile Include="Implicant.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,27 +4,43 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include <vector>
+#include <map>
 
 using namespace std;
 
 class Implicant {
 	friend ostream& operator<<(ostream&, Implicant&);
 private:
-	int boolean[4];
-	int variables;
+	vector<int> boolean;
 	set<int> decimalNum;
-	void computeDecimal();
+	bool care_implicant;
+	bool merged = false;
+	bool repeated = false;
+	vector<int>dont_care_positoin;
+
+	void findDontCare();
+
+	void computeDecimal(int taken, int result = 0, int now = 0, int round = 1, int care_sigma = -1);
+
+	static int variable_amount;
+	static set<Implicant*> object_list;
+
 public:
-	Implicant(int, int);
-	Implicant(string, int);
-	Implicant(Implicant&, Implicant&, int);
-	bool oneDifferent(const Implicant&);
+	Implicant(int decimal, bool care_implicant = true);
+	Implicant(const string term, bool care_implicant);
+	Implicant(Implicant& a, Implicant& b);
+	~Implicant();
+	bool oneDiffer(const Implicant& a) const;
 	set<int> getDecimal() const;
 	int care() const;
-	bool contain(Implicant&);
-	bool operator==(Implicant&);
-	int getVariables();
-	//Implicant& operator=(Implicant&);
+	bool contain(Implicant& a) const;
+	bool isRepeated() const;
+	bool operator==(const Implicant& a) const;
+
+	static bool setVariableAmount(int variable_amount);
+	static int getVariableAmount();
+
 };
 
 #endif
