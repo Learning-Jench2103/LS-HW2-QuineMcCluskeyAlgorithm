@@ -20,7 +20,7 @@ void Implicant::computeDecimal(int taken, int result, int now, int round, int ca
 		care_sigma = 0;
 		for (int i = 0; i < variable_amount; i++) {
 			if (boolean.at(i) == 1) {
-				care_sigma += pow(10, variable_amount - 1 - i);
+				care_sigma += pow(2, variable_amount - 1 - i);
 			}
 		}
 		result = care_sigma;
@@ -55,12 +55,17 @@ Implicant::Implicant(int decimal, bool care_implicant)
 	}
 
 	Implicant::care_implicant = care_implicant;
-	object_list.insert(this);
+
 	findDontCare();
 	for (int i = 0; i <= dont_care_positoin.size(); i++) {
 		computeDecimal(i);
 	}
-
+	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
+		if ((*this) == *(*it)) {
+			repeated = true;
+		}
+	}
+	object_list.insert(this);
 }
 
 Implicant::Implicant(const string term, bool care_implicant)
@@ -89,11 +94,16 @@ Implicant::Implicant(const string term, bool care_implicant)
 	}
 
 	Implicant::care_implicant = care_implicant;
-	object_list.insert(this);
 	findDontCare();
 	for (int i = 0; i <= dont_care_positoin.size(); i++) {
 		computeDecimal(i);
 	}
+	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
+		if ((*this) == *(*it)) {
+			repeated = true;
+		}
+	}
+	object_list.insert(this);
 }
 
 Implicant::Implicant(Implicant& a, Implicant& b)
@@ -107,7 +117,6 @@ Implicant::Implicant(Implicant& a, Implicant& b)
 
 	a.merged = true; b.merged = true;
 	Implicant::care_implicant = (a.care_implicant || b.care_implicant);
-	object_list.insert(this);
 	findDontCare();
 	for (int i = 0; i <= dont_care_positoin.size(); i++) {
 		computeDecimal(i);
@@ -117,6 +126,7 @@ Implicant::Implicant(Implicant& a, Implicant& b)
 			repeated = true;
 		}
 	}
+	object_list.insert(this);
 }
 
 Implicant::~Implicant()
@@ -165,6 +175,11 @@ bool Implicant::contain(Implicant& a) const
 		}
 	}
 	return true;
+}
+
+bool Implicant::isRepeated() const
+{
+	return repeated;
 }
 
 bool Implicant::operator==(const Implicant& a) const
