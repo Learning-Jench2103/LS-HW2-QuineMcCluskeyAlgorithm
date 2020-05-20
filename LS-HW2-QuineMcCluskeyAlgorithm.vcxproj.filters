@@ -18,9 +18,18 @@
     <ClInclude Include="Implicant.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="QM_method.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Implicant.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="QM_method.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>

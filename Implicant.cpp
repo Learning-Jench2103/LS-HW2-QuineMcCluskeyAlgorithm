@@ -14,6 +14,7 @@ void Implicant::findDontCare()
 	return;
 }
 
+/*
 void Implicant::computeDecimal(int taken, int result, int now, int round, int care_sigma)
 {
 	if (care_sigma == -1) {
@@ -25,27 +26,28 @@ void Implicant::computeDecimal(int taken, int result, int now, int round, int ca
 		}
 		result = care_sigma;
 	}
-	if (round = taken) {
+	if (round == taken) {
 		decimalNum.insert(result);
 		return;
 	}
 	if (taken - round > dont_care_positoin.size() - 1 - now) {
 		return;
 	}
-	else {
-		result += boolean.at(dont_care_positoin.at(now));
+	else if (dont_care_positoin.size() > 0) {
+		result += pow(2, boolean.size() - dont_care_positoin.at(now) - 1);
 		for (int i = now + 1; i < dont_care_positoin.size(); i++) {
 			computeDecimal(taken, result, i, round + 1, care_sigma);
 		}
 	}
 }
+*/
 
 Implicant::Implicant(int decimal, bool care_implicant)
 {
 	boolean.resize(variable_amount);
-
+	decimalNum.insert(decimal);
 	for (int i = 0; i < variable_amount; i++) {
-		if (decimal > pow(2, variable_amount - i - 1)) {
+		if (decimal >= pow(2, variable_amount - i - 1)) {
 			boolean.at(i) = 1;
 			decimal -= pow(2, variable_amount - i - 1);
 		}
@@ -57,17 +59,18 @@ Implicant::Implicant(int decimal, bool care_implicant)
 	Implicant::care_implicant = care_implicant;
 
 	findDontCare();
-	for (int i = 0; i <= dont_care_positoin.size(); i++) {
-		computeDecimal(i);
-	}
-	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
-		if ((*this) == *(*it)) {
+	
+	/*
+	for (set<void*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
+		if ((*this) == *(static_cast<Implicant*>(*it))) {
 			repeated = true;
 		}
 	}
 	object_list.insert(this);
+	*/
 }
 
+/*
 Implicant::Implicant(const string term, bool care_implicant)
 {
 	int var = 0;
@@ -98,13 +101,8 @@ Implicant::Implicant(const string term, bool care_implicant)
 	for (int i = 0; i <= dont_care_positoin.size(); i++) {
 		computeDecimal(i);
 	}
-	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
-		if ((*this) == *(*it)) {
-			repeated = true;
-		}
-	}
-	object_list.insert(this);
 }
+*/
 
 Implicant::Implicant(Implicant& a, Implicant& b)
 {
@@ -118,20 +116,24 @@ Implicant::Implicant(Implicant& a, Implicant& b)
 	a.merged = true; b.merged = true;
 	Implicant::care_implicant = (a.care_implicant || b.care_implicant);
 	findDontCare();
-	for (int i = 0; i <= dont_care_positoin.size(); i++) {
-		computeDecimal(i);
-	}
-	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
-		if ((*this) == *(*it)) {
-			repeated = true;
-		}
-	}
-	object_list.insert(this);
+	decimalNum.insert(a.decimalNum.begin(), a.decimalNum.end());
+	decimalNum.insert(b.decimalNum.begin(), b.decimalNum.end());
+}
+
+Implicant::Implicant(const Implicant& a)
+{
+	boolean = a.boolean;
+	decimalNum = a.decimalNum;
+	care_implicant = a.care_implicant;
+	merged = a.merged;
+	repeated = a.repeated;
+	dont_care_positoin = a.dont_care_positoin;
+	//object_list.insert(this);
 }
 
 Implicant::~Implicant()
 {
-	object_list.erase(this);
+	//object_list.erase(this);
 }
 
 bool Implicant::oneDiffer(const Implicant& a) const
@@ -156,6 +158,22 @@ set<int> Implicant::getDecimal() const
 	return decimalNum;
 }
 
+string Implicant::getBooleanEquation() const
+{
+	string result;
+	for (int i = 0; i < Implicant::getVariableAmount(); i++) {
+		if (boolean.at(i) == 1) {
+			result += (char)('A' + i);
+			result += ' ';
+		}
+		else if (boolean.at(i) == 0) {
+			result += (char)('A' + i);
+			result += '\'';
+		}
+	}
+	return result;
+}
+
 int Implicant::care() const
 {
 	int care = 0;
@@ -177,6 +195,21 @@ bool Implicant::contain(Implicant& a) const
 	return true;
 }
 
+bool Implicant::isCareTerm() const
+{
+	return care_implicant;
+}
+
+bool Implicant::isMerged() const
+{
+	return merged;
+}
+
+void Implicant::setRepeated(void)
+{
+	repeated = true;
+}
+
 bool Implicant::isRepeated() const
 {
 	return repeated;
@@ -187,27 +220,20 @@ bool Implicant::operator==(const Implicant& a) const
 	return (boolean == a.boolean && decimalNum == a.decimalNum);
 }
 
-bool Implicant::setVariableAmount(int variable_amount)
+int Implicant::count_1() const
 {
-	if (variable_amount < Implicant::variable_amount) {
-		return false;
-	}
-	if (variable_amount == Implicant::variable_amount) {
-		return true;
-	}
-	int old_amount = Implicant::variable_amount;
-	Implicant::variable_amount = variable_amount;
-	for (set<Implicant*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
-		for (int i = old_amount; i < variable_amount; i++) {
-			(*it)->boolean.push_back(-1);
-		}
-		(*it)->findDontCare();
-		for (int i = 0; i <= (*it)->dont_care_positoin.size(); i++) {
-			(*it)->computeDecimal(i);
+	int count = 0;
+	for (int i = 0; i < boolean.size(); i++) {
+		if (boolean.at(i) == 1) {
+			count++;
 		}
 	}
+	return count;
+}
 
-	return true;
+void Implicant::setVariableAmount(int variable_amount)
+{
+	Implicant::variable_amount = variable_amount;
 }
 
 int Implicant::getVariableAmount()
