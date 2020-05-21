@@ -14,34 +14,6 @@ void Implicant::findDontCare()
 	return;
 }
 
-/*
-void Implicant::computeDecimal(int taken, int result, int now, int round, int care_sigma)
-{
-	if (care_sigma == -1) {
-		care_sigma = 0;
-		for (int i = 0; i < variable_amount; i++) {
-			if (boolean.at(i) == 1) {
-				care_sigma += pow(2, variable_amount - 1 - i);
-			}
-		}
-		result = care_sigma;
-	}
-	if (round == taken) {
-		decimalNum.insert(result);
-		return;
-	}
-	if (taken - round > dont_care_positoin.size() - 1 - now) {
-		return;
-	}
-	else if (dont_care_positoin.size() > 0) {
-		result += pow(2, boolean.size() - dont_care_positoin.at(now) - 1);
-		for (int i = now + 1; i < dont_care_positoin.size(); i++) {
-			computeDecimal(taken, result, i, round + 1, care_sigma);
-		}
-	}
-}
-*/
-
 Implicant::Implicant(int decimal, bool care_implicant)
 {
 	boolean.resize(variable_amount);
@@ -59,50 +31,7 @@ Implicant::Implicant(int decimal, bool care_implicant)
 	Implicant::care_implicant = care_implicant;
 
 	findDontCare();
-	
-	/*
-	for (set<void*>::iterator it = object_list.begin(); it != object_list.end(); it++) {
-		if ((*this) == *(static_cast<Implicant*>(*it))) {
-			repeated = true;
-		}
-	}
-	object_list.insert(this);
-	*/
 }
-
-/*
-Implicant::Implicant(const string term, bool care_implicant)
-{
-	int var = 0;
-	for (int i = 0; i < term.length(); i++) {
-		if (term[i] < 'a' || term[i] > 'z') {
-			continue;
-		}
-		if ((term[i] >= 'a' && term[i] <= 'z') && term[i] - 'a' + 1 > var) {
-			var = term[i] - 'a' + 1;
-		}
-	}
-	for (int i = 0; i < var; i++) {
-		int posi = term.find((char)('a' + i), 0);
-		if (posi == -1) {
-			boolean.at(i) = -1;
-			continue;
-		}
-		if (posi == term.length() - 1 || (posi < term.length() - 1 && term[posi + 1] != '\'')) {
-			boolean.at(i) = 1;
-		}
-		else {
-			boolean.at(i) = 0;
-		}
-	}
-
-	Implicant::care_implicant = care_implicant;
-	findDontCare();
-	for (int i = 0; i <= dont_care_positoin.size(); i++) {
-		computeDecimal(i);
-	}
-}
-*/
 
 Implicant::Implicant(Implicant& a, Implicant& b)
 {
@@ -128,12 +57,6 @@ Implicant::Implicant(const Implicant& a)
 	merged = a.merged;
 	repeated = a.repeated;
 	dont_care_positoin = a.dont_care_positoin;
-	//object_list.insert(this);
-}
-
-Implicant::~Implicant()
-{
-	//object_list.erase(this);
 }
 
 bool Implicant::oneDiffer(const Implicant& a) const

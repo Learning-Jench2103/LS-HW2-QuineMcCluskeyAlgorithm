@@ -35,7 +35,6 @@ public:
 	//Implicant(const string term, bool care_implicant);
 	Implicant(Implicant& a, Implicant& b);
 	Implicant(const Implicant& a);
-	~Implicant();
 	bool oneDiffer(const Implicant& a) const;
 	set<int> getDecimal() const;
 	string getBooleanEquation() const;

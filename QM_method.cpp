@@ -72,71 +72,6 @@ void QM_method::simplify(vector<Implicant> last, int column)
 
 }
 
-/*
-vector<Implicant> QM_method::petrickMethod(vector<Implicant> chosen, map<int, bool> care_chosen, int index)
-{
-	// this combination can't cover all care-number //
-	if (index == minimumSOP.size()) {
-		chosen.clear();
-		return chosen;
-	}
-
-	// this term can't cover any care-number which is uncovered //
-	set<int> curr_set = minimumSOP.at(index).getDecimal();
-	bool coverd = false;
-	for (set<int>::iterator it = curr_set.begin(); it != curr_set.end(); it++) {
-		if (!care_chosen[*it]) {
-			coverd = true;
-			care_chosen[*it] = true;
-		}
-	}
-	if (!coverd) {
-		chosen.clear();
-		return chosen;
-	}
-
-	chosen.push_back(minimumSOP.at(index));
-
-	// check if all care-number are coverd with this term //
-	bool uncovered = false;
-	for (map<int, bool>::iterator it = care_chosen.begin(); it != care_chosen.end(); it++) {
-		if (!it->second) {
-			uncovered = true;
-			break;
-		}
-	}
-	if (!uncovered) {
-		return chosen;
-	}
-	if (index == minimumSOP.size() - 1 && uncovered) {
-		chosen.clear();
-		return chosen;
-	}
-
-	vector<Implicant> shortest;
-	vector<Implicant> reply;
-
-	for (int i = index + 1; i < minimumSOP.size(); i++) {
-		reply = petrickMethod(chosen, care_chosen, i);
-		if (reply.size() != 0 && shortest.size() == 0) {
-			shortest = reply;
-		}
-		else if (reply.size() != 0 && reply.size() < shortest.size()) {
-			shortest = reply;
-		}
-	}
-
-	if (shortest.size() != 0) {
-		return shortest;
-	}
-	else {
-		chosen.clear();
-		return chosen;
-	}
-
-}
-*/
-
 void QM_method::petrickMethod() {
 	map<int, set<int>> number_term_list;
 	for (int i = 0; i < minimumSOP.size(); i++) {
@@ -183,7 +118,6 @@ void QM_method::petrickMethod() {
 	}
 
 	minimumSOP = result;
-
 }
 
 void QM_method::printResult()
@@ -235,37 +169,6 @@ void QM_method::printResult()
 		file << endl;
 	}
 
-	/*
-	vector<Implicant> miniResult;
-	map<int, bool> care_chosen;
-	for (int i = 0; i < care_number.size(); i++) {
-		care_chosen[care_number.at(i)] = false;
-	}
-
-	for (int i = 0; i < minimumSOP.size(); i++) {
-		vector<Implicant> temp;
-		temp = petrickMethod(temp, care_chosen, i);
-		if (miniResult.size() == 0 && temp.size() != 0) {
-			miniResult = temp;
-		}
-		else if (temp.size() < miniResult.size() && temp.size() != 0) {
-			miniResult = temp;
-		}
-	}
-
-	for (int i = 0; i < miniResult.size(); i++) {
-		bool again = false;
-		for (int j = 0; j < minimumSOP.size(); j++) {
-			if (minimumSOP.at(j) == miniResult.at(i)) {
-				again = true;
-			}
-		}
-		if (!again) {
-			minimumSOP.push_back(miniResult.at(i));
-		}
-	}
-	*/
-
 	petrickMethod();
 
 	for (int i = 0; i < Implicant::getVariableAmount() * 2 + 2; i++) {
@@ -287,7 +190,6 @@ void QM_method::printResult()
 			file << " + " << minimumSOP.at(i).getBooleanEquation();
 		}
 	}
-
 }
 
 QM_method::QM_method(string fileName)
@@ -326,7 +228,6 @@ QM_method::QM_method(string fileName)
 					ss << input;
 					ss >> temp;
 					ss.str(""); ss.clear();
-					//care_number.push_back(temp);
 					origin.push_back(Implicant(temp, false));
 					getline(file, input);
 				}
