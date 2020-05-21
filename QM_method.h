@@ -17,7 +17,9 @@ private:
 	vector<Implicant> minimumSOP;
 
 	void simplify(vector<Implicant> last, int column);
-	vector<Implicant> petrickMethod(vector<Implicant> chosen, map<int, bool> care_chosen, int index);
+	//vector<Implicant> petrickMethod(vector<Implicant> chosen, map<int, bool> care_chosen, int index);
+	void petrickMethod();
+
 	void printResult();
 
 public:

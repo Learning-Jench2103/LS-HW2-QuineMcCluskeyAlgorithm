@@ -72,6 +72,7 @@ void QM_method::simplify(vector<Implicant> last, int column)
 
 }
 
+/*
 vector<Implicant> QM_method::petrickMethod(vector<Implicant> chosen, map<int, bool> care_chosen, int index)
 {
 	// this combination can't cover all care-number //
@@ -134,6 +135,56 @@ vector<Implicant> QM_method::petrickMethod(vector<Implicant> chosen, map<int, bo
 	}
 
 }
+*/
+
+void QM_method::petrickMethod() {
+	map<int, set<int>> number_term_list;
+	for (int i = 0; i < minimumSOP.size(); i++) {
+		set<int> temp = minimumSOP.at(i).getDecimal();
+		for (set<int>::iterator it = temp.begin(); it != temp.end(); it++) {
+			number_term_list[*it].insert(i);
+		}
+	}
+
+	vector<set<int>> last, now;
+
+	for (int i = 0; i < care_number.size(); i++) {
+		last = now;
+		now.clear();
+
+		if (last.size() == 0) {
+			for (set<int>::iterator it = number_term_list[care_number.at(i)].begin(); it != number_term_list[care_number.at(i)].end(); it++) {
+				set<int> temp;
+				temp.insert(*it);
+				now.push_back(temp);
+			}
+			continue;
+		}
+
+		for (set<int>::iterator it = number_term_list[care_number.at(i)].begin(); it != number_term_list[care_number.at(i)].end(); it++) {
+			for (int j = 0; j < last.size(); j++) {
+				set<int> temp = last.at(j);
+				temp.insert(*it);
+				now.push_back(temp);
+			}
+		}
+	}
+
+	set<int> shortest = now.at(0);
+	for (int i = 1; i < now.size(); i++) {
+		if (now.at(i).size() < shortest.size()) {
+			shortest = now.at(i);
+		}
+	}
+
+	vector<Implicant> result;
+	for (set<int>::iterator it = shortest.begin(); it != shortest.end(); it++) {
+		result.push_back(minimumSOP.at(*it));
+	}
+
+	minimumSOP = result;
+
+}
 
 void QM_method::printResult()
 {
@@ -184,6 +235,7 @@ void QM_method::printResult()
 		file << endl;
 	}
 
+	/*
 	vector<Implicant> miniResult;
 	map<int, bool> care_chosen;
 	for (int i = 0; i < care_number.size(); i++) {
@@ -212,6 +264,9 @@ void QM_method::printResult()
 			minimumSOP.push_back(miniResult.at(i));
 		}
 	}
+	*/
+
+	petrickMethod();
 
 	for (int i = 0; i < Implicant::getVariableAmount() * 2 + 2; i++) {
 		file << "-";
@@ -261,27 +316,29 @@ QM_method::QM_method(string fileName)
 
 	// input = "]"
 
-
-	getline(file, input);
-
-	if (input.length() == 1 || input.length() >= 2 && (input[1] > '9' || input[1] < '0')) {
+	if (!file.eof()) {
 		getline(file, input);
-		while (input[0] >= '0' && input[0] <= '9') {
-			ss << input;
-			ss >> temp;
-			ss.str(""); ss.clear();
-			care_number.push_back(temp);
-			origin.push_back(Implicant(temp, false));
-			getline(file, input);
+		if (input.length() != 0 && input.at(0) == '(') {
+
+			if (input.length() == 1 || input.length() >= 2 && (input[1] > '9' || input[1] < '0')) {
+				getline(file, input);
+				while (input[0] >= '0' && input[0] <= '9') {
+					ss << input;
+					ss >> temp;
+					ss.str(""); ss.clear();
+					//care_number.push_back(temp);
+					origin.push_back(Implicant(temp, false));
+					getline(file, input);
+				}
+			}
+			else {
+				ss << string(input.begin() + input.find('(') + 1, input.begin() + input.find(')'));
+				ss >> temp;
+				ss.str(""); ss.clear();
+				origin.push_back(Implicant(temp, false));
+			}
 		}
 	}
-	else {
-		ss << string(input.begin() + input.find('(') + 1, input.begin() + input.find(')'));
-		ss >> temp;
-		ss.str(""); ss.clear();
-		origin.push_back(Implicant(temp, false));
-	}
-
 	file.close();
 
 	fstream("output.txt", ios::out);
