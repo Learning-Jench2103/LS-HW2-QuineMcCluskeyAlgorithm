@@ -17,10 +17,9 @@ private:
 	vector<Implicant> minimumSOP;
 
 	void simplify(vector<Implicant> last, int column);
-	void petrickMethod();
-
 	void printResult();
-
+	void petrickMethod();
+	
 public:
 	QM_method(string fileName);
 	void run();

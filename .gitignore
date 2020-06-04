@@ -340,3 +340,5 @@ ASALocalRun/
 healthchecksdb
 /output.txt
 /input.txt
+/old
+/Document

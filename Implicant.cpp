@@ -7,7 +7,7 @@ int Implicant::variable_amount = 10;
 void Implicant::findDontCare()
 {
 	for (int i = 0; i < variable_amount; i++) {
-		if (boolean.at(i) == -1) {
+		if (boolean.at(i) == -1) {	// store don't care term as -1
 			dont_care_positoin.push_back(i);
 		}
 	}
@@ -29,7 +29,6 @@ Implicant::Implicant(int decimal, bool care_implicant)
 	}
 
 	Implicant::care_implicant = care_implicant;
-
 	findDontCare();
 }
 
@@ -83,16 +82,22 @@ set<int> Implicant::getDecimal() const
 
 string Implicant::getBooleanEquation() const
 {
+	bool output = false;
 	string result;
 	for (int i = 0; i < Implicant::getVariableAmount(); i++) {
 		if (boolean.at(i) == 1) {
 			result += (char)('A' + i);
 			result += ' ';
+			output = true;
 		}
 		else if (boolean.at(i) == 0) {
 			result += (char)('A' + i);
 			result += '\'';
+			output = true;
 		}
+	}
+	if (!output) {
+		result += "1";
 	}
 	return result;
 }

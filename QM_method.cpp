@@ -7,18 +7,25 @@ void QM_method::simplify(vector<Implicant> last, int column)
 
 	vector<Implicant> current;
 	vector<Implicant>* group = new vector<Implicant>[Implicant::getVariableAmount() + 1];
+
+	// grouping implicants according to the number of 1 in each implicant
 	for (int i = 0; i < last.size(); i++) {
 		group[last.at(i).count_1()].push_back(last.at(i));
 	}
+
+	// merging implicants in near groups //
 	for (int count_1 = 0; count_1 < Implicant::getVariableAmount(); count_1++) {
+		// if this group is empty then skip
 		if (group[count_1].size() == 0 || group[count_1 + 1].size() == 0) {
 			continue;
 		}
 
 		for (int index_1 = 0; index_1 < group[count_1].size(); index_1++) {
 			for (int index_2 = 0; index_2 < group[count_1 + 1].size(); index_2++) {
-				if (group[count_1].at(index_1).oneDiffer(group[count_1 + 1].at(index_2))) {
+				// check if both the two implicants are not duplicate and are different at the same one bit then merge them
+				if (!group[count_1].at(index_1).isRepeated() && !group[count_1 + 1].at(index_2).isRepeated() && group[count_1].at(index_1).oneDiffer(group[count_1 + 1].at(index_2))) {
 					Implicant temp(group[count_1].at(index_1), group[count_1 + 1].at(index_2));
+					// check if there is already a same implicant in vector<Implicant> current
 					for (int i = 0; i < current.size(); i++) {
 						if (current.at(i) == temp) {
 							temp.setRepeated();
@@ -31,6 +38,7 @@ void QM_method::simplify(vector<Implicant> last, int column)
 		}
 	}
 
+	// if a implicant had not been merged then put it into vector<Implicant> minimumSOP
 	for (int i = 0; i <= Implicant::getVariableAmount(); i++) {
 		for (int j = 0; j < group[i].size(); j++) {
 			if (!group[i].at(j).isMerged() && group[i].at(j).isCareTerm() && !group[i].at(j).isRepeated()) {
@@ -73,6 +81,7 @@ void QM_method::simplify(vector<Implicant> last, int column)
 }
 
 void QM_method::petrickMethod() {
+	// <minterm, implicants>
 	map<int, set<int>> number_term_list;
 	for (int i = 0; i < minimumSOP.size(); i++) {
 		set<int> temp = minimumSOP.at(i).getDecimal();
@@ -96,6 +105,7 @@ void QM_method::petrickMethod() {
 			continue;
 		}
 
+		// extend POS to SOP
 		for (set<int>::iterator it = number_term_list[care_number.at(i)].begin(); it != number_term_list[care_number.at(i)].end(); it++) {
 			for (int j = 0; j < last.size(); j++) {
 				set<int> temp = last.at(j);
@@ -105,6 +115,7 @@ void QM_method::petrickMethod() {
 		}
 	}
 
+	// find the shortest product term
 	set<int> shortest = now.at(0);
 	for (int i = 1; i < now.size(); i++) {
 		if (now.at(i).size() < shortest.size()) {
@@ -125,7 +136,7 @@ void QM_method::printResult()
 	fstream file("output.txt", ios::app);
 
 	file << "Result" << endl;
-	for (int i = 0; i < Implicant::getVariableAmount() * 2 + 3 + care_number.size() * 6 + 6; i++) {
+	for (int i = 0; i < Implicant::getVariableAmount() * (__int64)2 + 3 + care_number.size() * (__int64)6 + 6; i++) {
 		file << "=";
 	}
 	file << endl;
@@ -152,7 +163,7 @@ void QM_method::printResult()
 	for (int i = 0; i < minimumSOP.size(); i++) {
 		string booleanEq = minimumSOP.at(i).getBooleanEquation();
 		file << booleanEq;
-		for (int j = 0; j < Implicant::getVariableAmount() * 2 + 2 - booleanEq.length(); j++) {
+		for (int j = 0; j < Implicant::getVariableAmount() * (__int64)2 + 2 - booleanEq.length(); j++) {
 			file << " ";
 		}
 		file << "|";
@@ -195,6 +206,12 @@ void QM_method::printResult()
 QM_method::QM_method(string fileName)
 {
 	fstream file(fileName, ios::in);
+	if (!file) {
+		cout << "\n\n   input.txt 未找到！\n\n\n";
+		system("pause");
+		exit(1);
+	}
+
 	string input;
 	getline(file, input);
 	stringstream ss;
@@ -248,4 +265,6 @@ QM_method::QM_method(string fileName)
 void QM_method::run()
 {
 	simplify(origin, 1);
+	cout << "\n\n   輸出完成!!!\n\n\n";
+	system("pause");
 }
