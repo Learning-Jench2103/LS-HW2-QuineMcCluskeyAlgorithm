@@ -16,7 +16,7 @@ private:
 	vector<int> care_number;
 	vector<Implicant> minimumSOP;
 
-	void simplify(vector<Implicant> last, int column);
+	void simplify(vector<Implicant>*& last, int column);
 	void printResult();
 	void petrickMethod();
 	

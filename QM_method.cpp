@@ -1,16 +1,16 @@
 #include "QM_method.h"
 #include <iomanip>
 
-void QM_method::simplify(vector<Implicant> last, int column)
+void QM_method::simplify(vector<Implicant>*& last, int column)
 {
 	fstream file("output.txt", ios::app);
 
-	vector<Implicant> current;
+	vector<Implicant>* current = new vector<Implicant>;
 	vector<Implicant>* group = new vector<Implicant>[Implicant::getVariableAmount() + 1];
 
 	// grouping implicants according to the number of 1 in each implicant
-	for (int i = 0; i < last.size(); i++) {
-		group[last.at(i).count_1()].push_back(last.at(i));
+	for (int i = 0; i < last->size(); i++) {
+		group[last->at(i).count_1()].push_back(last->at(i));
 	}
 
 	// merging implicants in near groups //
@@ -26,13 +26,13 @@ void QM_method::simplify(vector<Implicant> last, int column)
 				if (!group[count_1].at(index_1).isRepeated() && !group[count_1 + 1].at(index_2).isRepeated() && group[count_1].at(index_1).oneDiffer(group[count_1 + 1].at(index_2))) {
 					Implicant temp(group[count_1].at(index_1), group[count_1 + 1].at(index_2));
 					// check if there is already a same implicant in vector<Implicant> current
-					for (int i = 0; i < current.size(); i++) {
-						if (current.at(i) == temp) {
+					for (int i = 0; i < current->size(); i++) {
+						if (current->at(i) == temp) {
 							temp.setRepeated();
 							break;
 						}
 					}
-					current.push_back(temp);
+					current->push_back(temp);
 				}
 			}
 		}
@@ -71,8 +71,14 @@ void QM_method::simplify(vector<Implicant> last, int column)
 
 	delete[] group;
 
-	if (current.size() != 0) {
-		simplify(current, column + 1);
+	delete last;
+	last = new vector<Implicant>;
+
+	*last = *current;
+	delete current;
+
+	if ((*last).size() != 0) {
+		simplify(last, column + 1);
 	}
 	else {
 		printResult();
@@ -264,7 +270,10 @@ QM_method::QM_method(string fileName)
 
 void QM_method::run()
 {
-	simplify(origin, 1);
+	vector<Implicant>* Origin = new vector<Implicant>;
+	*Origin = origin;
+	simplify(Origin, 1);
+	delete Origin;
 	cout << "\n\n   ¿é¥X§¹¦¨!!!\n\n\n";
 	system("pause");
 }
