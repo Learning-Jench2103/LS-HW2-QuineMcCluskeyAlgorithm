@@ -1,5 +1,6 @@
 #ifndef QM_METHOD_H
 #define QM_METHOD_H
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <fstream>

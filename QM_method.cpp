@@ -96,38 +96,49 @@ void QM_method::petrickMethod() {
 		}
 	}
 
-	vector<set<int>> last, now;
+	vector<set<int>>* last;
+	vector<set<int>>* now;
+	last = new vector<set<int>>;
+	now = new vector<set<int>>;
 
 	for (int i = 0; i < care_number.size(); i++) {
-		last = now;
-		now.clear();
+		delete last;
+		last = new vector<set<int>>;
+		*last = *now;
+		delete now;
+		now = new vector<set<int>>;
 
-		if (last.size() == 0) {
+		if (last->size() == 0) {
 			for (set<int>::iterator it = number_term_list[care_number.at(i)].begin(); it != number_term_list[care_number.at(i)].end(); it++) {
 				set<int> temp;
 				temp.insert(*it);
-				now.push_back(temp);
+				now->push_back(temp);
 			}
 			continue;
 		}
-
-		// extend POS to SOP
-		for (set<int>::iterator it = number_term_list[care_number.at(i)].begin(); it != number_term_list[care_number.at(i)].end(); it++) {
-			for (int j = 0; j < last.size(); j++) {
-				set<int> temp = last.at(j);
-				temp.insert(*it);
-				now.push_back(temp);
+		else {
+			// extend POS to SOP
+			for (set<int>::iterator it = number_term_list[care_number.at(i)].begin(); it != number_term_list[care_number.at(i)].end(); it++) {
+				for (int j = 0; j < last->size(); j++) {
+					set<int> temp = last->at(j);
+					temp.insert(*it);
+					if (find(now->begin(), now->end(), temp) == now->end()) {
+						now->push_back(temp);
+					}
+				}
 			}
 		}
 	}
+	delete last;
 
 	// find the shortest product term
-	set<int> shortest = now.at(0);
-	for (int i = 1; i < now.size(); i++) {
-		if (now.at(i).size() < shortest.size()) {
-			shortest = now.at(i);
+	set<int> shortest = now->at(0);
+	for (int i = 1; i < now->size(); i++) {
+		if (now->at(i).size() < shortest.size()) {
+			shortest = now->at(i);
 		}
 	}
+	delete now;
 
 	vector<Implicant> result;
 	for (set<int>::iterator it = shortest.begin(); it != shortest.end(); it++) {
